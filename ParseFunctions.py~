@@ -1,0 +1,130 @@
+import AllModules as am
+
+RunTableAttributeNames = ['Run number', 'Start time', 'Number of spills', 'Events with track', 'Events after conversion', 'Events after timingDAQ', 'Events', 'Tracking', 'Conversion', 'TimingDAQ']
+RunTableAttributeStatus = ['Processing', 'Failed', 'Not started', 'Complete', 'N/A']
+MyKey = 'keyfsS7rNSv9sNG6I'
+RunTableName = 'tblC4GsJFKjvXgG4e'
+SensorTableName = 'tblAUIj7OVFteuAEL'
+ConfigTableName = 'tblPKdZ7mOWfPr3K0'
+
+BaseID = 'appd8tCrKgKiaAfre'
+CurlBaseCommand = 'https://api.airtable.com/v0/%s/%s' % (BaseID, RunTableName)
+CurlBaseCommandSensor = 'https://api.airtable.com/v0/%s/%s' % (BaseID, SensorTableName)
+CurlBaseCommandConfig = 'https://api.airtable.com/v0/%s/%s' % (BaseID, ConfigTableName)
+
+
+################################################################################################################################################################################################################                                                                         
+################################################################################################################################################################################################################                                                                         
+#########################################These Functions parse the run table and performs function such as record query,  record update, record Addition etc ###################################################
+################################################################################################################################################################################################################                                           
+################################################################################################################################################################################################################           
+    
+
+################### Unicode Operations to form CURL commands ###################
+
+def QueryLog():
+  #Make a text file which writes 
+
+
+
+
+
+
+
+def DoubleQuotes(string):
+    return '%%22%s%%22' % string 
+
+def Curly(string):
+    return '%%7B%s%%7D' % string
+    
+def EqualToFunc(string1,string2):
+    return '%s%%3D%s' % (string1,string2)
+
+def ANDFunc(AttributeNameList, AttributeStatusList):
+    Output = 'AND('
+    for AttributeName in AttributeNameList:
+        AttributeStatus = AttributeStatusList[AttributeNameList.index(AttributeName)]
+        Condition = EqualToFunc(Curly(AttributeName), DoubleQuotes(AttributeStatus))
+        if AttrbiuteNameList.index(AttributeName) > 0: Output = Output + ','
+        Output = Output + Condition
+    Output = Output + ')'
+    return Output
+ 
+def ORFunc(AttributeNameList, AttributeStatusList):
+    Output = 'OR('
+    for AttributeName in AttributeNameList:
+        AttributeStatus = AttributeStatusList[AttributeNameList.index(AttributeName)]
+        Condition = EqualToFunc(Curly(AttributeName), DoubleQuotes(AttributeStatus))
+        if AttrbiuteNameList.index(AttributeName) > 0: Output = Output + ','
+        Output = Output + Condition
+    Output = Output + ')'
+    return Output
+
+
+##################### Main Run Table Operaton functions #########################C
+
+def ParsingQuery(NumberOfConditions, ConditionAttributeNames, ConditionAttributeStatus, QueryAttributeName):
+    Output = [] 
+    FieldID = []
+    FilterByFormula = None
+    headers = {'Authorization': 'Bearer %s' % MyKey, }
+    for i in range (0, NumberOfConditions): 
+        if i > 0: FilterByFormula = FilterByFormula + ','
+        FilterByFormula = FilterByFormula + EqualToFunc(Curly(ConditionAttributeNames[i]), DoubleQuotes(ConditionAttributeStatus[i])) 
+    if NumberOfConditions > 1: FilterByFormula = 'AND(' + FilterByFormula + ')'
+    response = requests.get(CurlBaseCommand  + '?filterByFormula=' + FilterByFormula, headers=headers)
+    ResponseDict = ast.literal_eval(response.text)
+
+    for i in ResponseDict["records"]: Output.append(i['fields'][QueryAttributeName])   
+    for i in ResponseDict["records"]: FieldID.append(i['id'])   
+    return Output, FieldID
+
+def GetFieldID(ConditionAttributeName, ConditionAttributeStatus):
+    Output = [] 
+    FilterByFormula = EqualToFunc(Curly(ConditionAttributeName), DoubleQuotes(CoOBnditionAttributeStatus))
+    headers = {'Authorization': 'Bearer %s' % MyKey, }
+    response = requests.get(CurlBaseCommand  + '?filterByFormula=' + FilterByFormula, headers=headers)
+    ResponseDict = ast.literal_eval(response.text)
+
+    for i in ResponseDict["records"]: Output.append(i['id'])   
+    return Output
+
+def UpdateAttributeStatus(FieldID, UpdateAttributeName, UpdateAttributeStatus):
+    headers = {
+        'Authorization': 'Bearer %s' % MyKey, 
+        'Content-Type': 'application/json',
+    }
+    data = '{"fields":{"%s": ["%s"]}}' % (UpdateAttributeName,UpdateAttributeStatus)
+    response = requests.post(CurlBaseCommand + '/' + FieldID, headers=headers, data=data)
+    ResponseDict = ast.literal_eval(response.text)
+
+def GetFieldIDOtherTable(TableName,ConditionAttributeName, ConditionAttributeStatus):
+    if TableName == 'Sensor' :
+        CurlBaseCommand = CurlBaseCommandSensor
+    elif TableName == 'Config':
+        CurlBaseCommand = CurlBaseCommandConfig
+    Output = [] 
+    FilterByFormula = EqualToFunc(Curly(ConditionAttributeName), DoubleQuotes(ConditionAttributeStatus))
+    headers = {'Authorization': 'Bearer %s' % MyKey, }
+    response = requests.get(CurlBaseCommand  + '?filterByFormula=' + FilterByFormula, headers=headers)
+    ResponseDict = ast.literal_eval(response.text)
+
+    for i in ResponseDict["records"]: Output.append(i['id'])   
+    return Output
+
+def NewRunRecord(RunNumber, StartTime, Duration, Digitizer, Tracking, Conversion, TimingDAQ, SensorID, ConfigID):
+    headers = {
+        'Authorization': 'Bearer %s' % MyKey, 
+        'Content-Type': 'application/json',
+    }
+    #Example template of a query response :      {'records': [{'createdTime': '2015-02-12T03:40:42.000Z', 'fields': {'Conversion': ['Complete'], 'Time Resolution 1': 30, 'TimingDAQ': ['Failed'], 'Notes': 'Make test beam great again\n', 'HV 1': ['recJRiQqSHzTNZqal'], 'Run number': 4, 'Tracking': ['Processing'], 'Configuration': ['rectY95k7m19likjW'], 'Sensor': ['recNwdccBdzS7iBa5']}, 'id': 'recNsKOMDvYKrJzXd'}]}
+    data = '{"fields":{"Run number": %d,"Start time": "%s", "Duration": "%s", "Digitizer": ["%s"], "Tracking": ["%s"], "Conversion": ["%s"],"TimingDAQ": ["%s"],"Sensor": ["%s"],"Configuration": ["%s"]}}' % (RunNumber, StartTime, Duration, Digitizer, Tracking, Conversion, TimingDAQ, SensorID[0], ConfigID[0])
+    response = requests.post(CurlBaseCommand, headers=headers, data=data)
+    ResponseDict = ast.literal_eval(response.text)
+    return ResponseDict
+
+
+
+
+
+ 
