@@ -28,7 +28,10 @@ def FileSizeBool(FilePath, SizeCut):
 		return am.os.stat(FilePath).st_size < SizeCut
 	else: return True
 
-def ProcessExec(OrderOfExecution, PID, SaveWaveformbool, Version): #PID is 1 for Tracking, 2 for Conversion, 3 for TimingDAQ
+def ProcessExec(OrderOfExecution, PID, SaveWaveformBool, Version): #PID is 1 for Tracking, 2 for Conversion, 3 for TimingDAQ
+	
+	SaveWaveformBool = SaveWaveformBool
+	Version = Version
 
 	if PID == 1:
 		ProcessName = 'Tracking'
@@ -41,7 +44,7 @@ def ProcessExec(OrderOfExecution, PID, SaveWaveformbool, Version): #PID is 1 for
 	elif PID == 3:
 		ProcessName = 'TimingDAQ'	
 		CMDList, CMDNoTracksList, ResultFileLocationList, RunList, FieldIDList = pc.TimingDAQCMDs(SaveWaveformBool, Version, False)
-		SizeCut = 10000
+		SizeCut = 20000
 
 	RunListInt = map(int,RunList)
 	if OrderOfExecution == 1: 
@@ -64,9 +67,11 @@ def ProcessExec(OrderOfExecution, PID, SaveWaveformbool, Version): #PID is 1 for
 				if pf.QueryGreenSignal(True): pf.UpdateAttributeStatus(str(FieldIDList[index]), ProcessName, 'Processing', False)
 				session = am.subprocess.Popen('source %s; %s' % (am.EnvSetupPath,str(CMD)),stdout=am.subprocess.PIPE, stderr=am.PIPE, shell=True)
 			elif PID == 3:
+				print 'I am here'
+				print str(CMD)
 				if pf.QueryGreenSignal(True): pf.UpdateAttributeStatus(str(FieldIDList[index]), ProcessName, 'Processing', False)
 				session = am.subprocess.Popen('cd %s; source %s; %s;cd -' % (am.TimingDAQDir,am.EnvSetupPath,str(CMD)),stdout=am.PIPE, stderr=am.subprocess.PIPE, shell=True)                                                                                                                                                                                   			
-
+				print 'I am now here'
 			stdout, stderr = session.communicate() 
 			ProcessLog(ProcessName, run, stdout)   
 			if FileSizeBool(ResultFileLocation,SizeCut) or not am.os.path.exists(ResultFileLocation): BadProcessExec = True                                                                                                                                                                                                                                                     

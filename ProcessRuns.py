@@ -65,9 +65,7 @@ def TimingDAQRuns(Debug):
         VersionList.append(i['fields']['Version'])                                                                                                                                                                                                                                       
         
     return RunList, FieldIDList, DigitizerList, RedoList, VersionList                                                                                                                                                                                                                   
-
-
-
+  
 
 
 

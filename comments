@@ -119,4 +119,52 @@ import requests
 import ast
 response = requests.get(CurlBaseCommand  + '?filterByFormula=' + FilterByFormula, headers=headers)                                                                                                                                                                                    
 ResponseDict = ast.literal_eval(response.text)
+
+
+
+
+import ProcessCMDs as pc
+import ProcessRuns as pr
+import ProcessExec as pe
+import AllModules as am
+import ParseFunctions as pf
+
+
+
+if TableName == 'Sensor' :
+CurlBaseCommand = am.CurlBaseCommandSensor
+elif TableName == 'Config':
+        CurlBaseCommand = am.CurlBaseCommandConfig
+    Output = [] 
+    FilterByFormula = EqualToFunc(Curly(ConditionAttributeName), DoubleQuotes(ConditionAttributeStatus))
+    headers = {'Authorization': 'Bearer %s' % am.MyKey, }
+    response = am.requests.get(am.CurlBaseCommand  + '?filterByFormula=' + FilterByFormula, headers=headers)
+    ResponseDict = am.ast.literal_eval(response.text)
+
+
+
+
+
+
+
+
+if pf.QueryGreenSignal(True): pf.NewRunRecord(5234, str(am.datetime.now()), '0.001', 'TekScope', 'Not started', 'Not started', 'Not started', SensorID, ConfigID)
+
+
+
+
+
+
+
+runs are processing and kill the shell script: then how to handle that
+what if the tracks are already there remotely, what if present at both places
+
+
+
+
+Each field you're querying should have entries for all the records
+Don't give options in version
+
+
+
     
