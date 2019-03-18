@@ -67,22 +67,13 @@ def ProcessExec(OrderOfExecution, PID, SaveWaveformBool, Version): #PID is 1 for
 				if pf.QueryGreenSignal(True): pf.UpdateAttributeStatus(str(FieldIDList[index]), ProcessName, 'Processing', False)
 				session = am.subprocess.Popen('source %s; %s' % (am.EnvSetupPath,str(CMD)),stdout=am.subprocess.PIPE, stderr=am.PIPE, shell=True)
 			elif PID == 3:
-				print 'I am here'
-				print str(CMD)
 				if pf.QueryGreenSignal(True): pf.UpdateAttributeStatus(str(FieldIDList[index]), ProcessName, 'Processing', False)
 				session = am.subprocess.Popen('cd %s; source %s; %s;cd -' % (am.TimingDAQDir,am.EnvSetupPath,str(CMD)),stdout=am.PIPE, stderr=am.subprocess.PIPE, shell=True)                                                                                                                                                                                   			
-				print 'I am now here'
 			stdout, stderr = session.communicate() 
 			ProcessLog(ProcessName, run, stdout)   
 			if FileSizeBool(ResultFileLocation,SizeCut) or not am.os.path.exists(ResultFileLocation): BadProcessExec = True                                                                                                                                                                                                                                                     
- 			print BadProcessExec
- 			print FileSizeBool(ResultFileLocation,SizeCut)
- 			print am.os.path.exists(ResultFileLocation)
- 			print FieldIDList[index]
-			if BadProcessExec:  
-				print 'I am true'                                                                                                                                                                                                                               
+			if BadProcessExec:                                                                                                                                                                                                                               
 				if pf.QueryGreenSignal(True): pf.UpdateAttributeStatus(str(FieldIDList[index]), ProcessName, 'Failed', False)  
 			else:
-				print 'I am FALSE'
 				if pf.QueryGreenSignal(True): pf.UpdateAttributeStatus(str(FieldIDList[index]), ProcessName, 'Complete', False)
 
