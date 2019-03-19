@@ -39,18 +39,25 @@ def ConversionRuns(Debug):
     return RunList, FieldIDList                                                                                                                                                                                                                   
 
 
-def TimingDAQRuns(Debug):                                                                                                                                                                                                                                               
+def TimingDAQRuns(DoTracking, Debug):                                                                                                                                                                                                                                               
     RunList = []                                                                                                                                                                                                                                                                         
     FieldIDList = []                                                                                                                                                                                                                                                                     
     DigitizerList = []                                                                                                                                                                                                                                                                   
     RedoList = []                                                                                                                                                                                                                                                                        
     VersionList = []                                                                                                                                                                                                                                                                     
     
+    if DoTracking:
+        ProcessName = 'TimingDAQ'
+    else:
+        ProcessName = 'TimingDAQNoTracks'
+
     OR1 = pf.ORFunc(['Conversion','Conversion'],['Complete', 'N/A'])                                                                 
     OR2 = pf.ORFunc(['Tracking','Tracking'],['Complete', 'N/A'])                                                                                                                                                              
-    OR3 = pf.ORFunc(['TimingDAQ','TimingDAQ','Redo'],['Not started', 'Retry','Redo'])                                                                                                                                                                                                  
+    OR3 = pf.ORFunc([ProcessName, ProcessName,'Redo'],['Not started', 'Retry','Redo'])                                                                                                                                                                                                  
 
-    FilterByFormula = 'AND(' + OR1 + ',' + OR2 + ',' + OR3 + ')'                                                                                                                                                                                                                         
+    FilterByFormula = 'AND(' + OR1 + ',' + OR3   
+    if DoTracking: FilterByFormula = FilterByFormula + ',' + OR2 
+    FilterByFormula = FilterByFormula + ')'
 
     headers = {'Authorization': 'Bearer %s' % am.MyKey, }                                                                                                                                                                                                                                
     if pf.QueryGreenSignal(True): response = am.requests.get(am.CurlBaseCommand  + '?filterByFormula=' + FilterByFormula, headers=headers)                                                                                                                                                                               

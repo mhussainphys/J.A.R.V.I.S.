@@ -70,6 +70,7 @@ if RunTableMode:
                 Conversion = 'N/A'                
 
         TimingDAQ = 'Not started'
+        TimingDAQNoTracks = 'Not started'
 
     # Get Sensor ID and Configuration ID list  
     
@@ -136,5 +137,5 @@ while True:
 
                                 Duration = StopTime - StartTime
 
-                                if pf.QueryGreenSignal(True): pf.NewRunRecord(RunNumber, StartTime, Duration, Digitizer, Tracking, Conversion, TimingDAQ, SensorID, ConfigID, False)
+                                if pf.QueryGreenSignal(True): pf.NewRunRecord(RunNumber, StartTime, Duration, Digitizer, Tracking, Conversion, TimingDAQ, TimingDAQNoTracks, SensorID, ConfigID, False)
                                 

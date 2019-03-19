@@ -43,7 +43,13 @@ def ProcessExec(OrderOfExecution, PID, SaveWaveformBool, Version): #PID is 1 for
 		SizeCut = 10000
 	elif PID == 3:
 		ProcessName = 'TimingDAQ'	
-		CMDList, CMDNoTracksList, ResultFileLocationList, RunList, FieldIDList = pc.TimingDAQCMDs(SaveWaveformBool, Version, False)
+		DoTracking = True
+		CMDList, ResultFileLocationList, RunList, FieldIDList = pc.TimingDAQCMDs(SaveWaveformBool, Version, DoTracking, False)
+		SizeCut = 20000
+	elif PID == 4:
+		ProcessName = 'TimingDAQNoTracks'
+		DoTracking = False	
+		CMDList, ResultFileLocationList, RunList, FieldIDList = pc.TimingDAQCMDs(SaveWaveformBool, Version, DoTracking, False)
 		SizeCut = 20000
 
 	RunListInt = map(int,RunList)
@@ -66,7 +72,7 @@ def ProcessExec(OrderOfExecution, PID, SaveWaveformBool, Version): #PID is 1 for
 			elif PID == 2:
 				if pf.QueryGreenSignal(True): pf.UpdateAttributeStatus(str(FieldIDList[index]), ProcessName, 'Processing', False)
 				session = am.subprocess.Popen('source %s; %s' % (am.EnvSetupPath,str(CMD)),stdout=am.subprocess.PIPE, stderr=am.PIPE, shell=True)
-			elif PID == 3:
+			elif PID == 3 or PID == 4:
 				if pf.QueryGreenSignal(True): pf.UpdateAttributeStatus(str(FieldIDList[index]), ProcessName, 'Processing', False)
 				session = am.subprocess.Popen('cd %s; source %s; %s;cd -' % (am.TimingDAQDir,am.EnvSetupPath,str(CMD)),stdout=am.PIPE, stderr=am.subprocess.PIPE, shell=True)                                                                                                                                                                                   			
 			stdout, stderr = session.communicate() 

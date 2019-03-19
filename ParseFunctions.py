@@ -149,13 +149,13 @@ def GetFieldIDOtherTable(TableName,ConditionAttributeName, ConditionAttributeSta
     for i in ResponseDict["records"]: Output.append(i['id'])   
     return Output
 
-def NewRunRecord(RunNumber, StartTime, Duration, Digitizer, Tracking, Conversion, TimingDAQ, SensorID, ConfigID, Debug):
+def NewRunRecord(RunNumber, StartTime, Duration, Digitizer, Tracking, Conversion, TimingDAQ, TimingDAQNoTracks, SensorID, ConfigID, Debug):
     headers = {
         'Authorization': 'Bearer %s' % am.MyKey, 
         'Content-Type': 'application/json',
     }
     #Example template of a query response :  {'records': [{'createdTime': '2015-02-12T03:40:42.000Z', 'fields': {'Conversion': ['Complete'], 'Time Resolution 1': 30, 'TimingDAQ': ['Failed'], 'Notes': 'Make test beam great again\n', 'HV 1': ['recJRiQqSHzTNZqal'], 'Run number': 4, 'Tracking': ['Processing'], 'Configuration': ['rectY95k7m19likjW'], 'Sensor': ['recNwdccBdzS7iBa5']}, 'id': 'recNsKOMDvYKrJzXd'}]}
-    data = '{"fields":{"Run number": %d,"Start time": "%s", "Duration": "%s", "Digitizer": ["%s"], "Tracking": ["%s"], "Conversion": ["%s"],"TimingDAQ": ["%s"],"Sensor": ["%s"],"Configuration": ["%s"]}}' % (RunNumber, StartTime, Duration, Digitizer, Tracking, Conversion, TimingDAQ, SensorID[0], ConfigID[0])
+    data = '{"fields":{"Run number": %d,"Start time": "%s", "Duration": "%s", "Digitizer": ["%s"], "Tracking": ["%s"], "Conversion": ["%s"],"TimingDAQ": ["%s"],"TimingDAQNoTracks": ["%s"], "Sensor": ["%s"],"Configuration": ["%s"]}}' % (RunNumber, StartTime, Duration, Digitizer, Tracking, Conversion, TimingDAQ, TimingDAQNoTracks, SensorID[0], ConfigID[0])
     response = am.requests.post(am.CurlBaseCommand, headers=headers, data=data)
     ResponseDict = am.ast.literal_eval(response.text)
     if Debug: return ResponseDict

@@ -41,11 +41,10 @@ def ConversionCMDs(Debug):
     return ConversionCMDList, ResultFileLocationList, RunList, FieldIDList
 
 
-def TimingDAQCMDs(SaveWaveformBool, Version, Debug):
-
-    RunList, FieldIDList, DigitizerList, RedoList, VersionList = pr.TimingDAQRuns(False)
-    DatToRootCMDWithTracksList = []
-    DatToRootCMDWithoutTracksList = []
+def TimingDAQCMDs(SaveWaveformBool, Version, DoTracking, Debug):
+    DoTracking = DoTracking 
+    RunList, FieldIDList, DigitizerList, RedoList, VersionList = pr.TimingDAQRuns(DoTracking, False)
+    DatToRootCMDList = []
     ResultFileLocationList = []
 
     if RunList:
@@ -63,31 +62,35 @@ def TimingDAQCMDs(SaveWaveformBool, Version, Debug):
             else: 
                 Version = Version
 
+            if Digitizer == 'TekScope': Digitizer = 'NetScopeStandalone'
+
             RecoBaseLocalPath = am.RecoBaseLocalPath + Digitizer+ '/' + Version + '/'
-            if not am.os.path.exists(am.RecoBaseLocalPath): am.os.system('mkdir %s' % am.RecoBaseLocalPath)
+            if not DoTracking: RecoBaseLocalPath = RecoBaseLocalPath + 'RecoWithoutTracks/'
+            if not am.os.path.exists(RecoBaseLocalPath): am.os.system('mkdir -p %s' % RecoBaseLocalPath)
 
             if Digitizer == 'VME' or Digitizer == 'DT5742':
-                am.RawBaseLocalPath = am.RawBaseLocalPath + Digitizer + '/' + Version + '/' 
-                ListRawRunNumber = [(x.split("_Run")[1].split(".dat")[0].split("_")[0]) for x in am.glob.glob(am.RawBaseLocalPath + '*_Run*')]
-                ListRawFilePath = [x for x in am.glob.glob(am.RawBaseLocalPath + '*_Run*')] 
+                RawBaseLocalPath = am.RawBaseLocalPath + Digitizer + '/' + Version + '/' 
+                ListRawRunNumber = [(x.split("_Run")[1].split(".dat")[0].split("_")[0]) for x in am.glob.glob(RawBaseLocalPath + '*_Run*')]
+                ListRawFilePath = [x for x in am.glob.glob(RawBaseLocalPath + '*_Run*')] 
                 RawLocalPath = ListRawFilePath[ListRawRunNumber.index(run)]
-                RecoLocalPath = am.RecoBaseLocalPath + RawLocalPath.split(".dat")[0].split("%s/" % Version)[1] + '.root'                                            
+                RecoLocalPath = RecoBaseLocalPath + RawLocalPath.split(".dat")[0].split("%s/" % Version)[1] + '.root'                                            
  
-            elif Digitizer == 'TekScope':
-                Digitizer = 'NetScopeStandalone'
+            elif Digitizer == 'NetScopeStandalone':
                 RawLocalPath = am.RawStageTwoLocalPathScope + 'run_scope' + str(run) + '.root'                                      
-                RecoLocalPath = am.RecoBaseLocalPath + Digitizer + '/' + Version + '/' + 'run_scope' + str(run) + '_converted.root' 
+                RecoLocalPath = RecoBaseLocalPath + 'run_scope' + str(run) + '_converted.root' 
 
             ResultFileLocationList.append(RecoLocalPath)
             ConfigFilePath = am.ConfigFileBasePath + Digitizer + '_%s.config' % Version
             DatToRootCMD = './' + Digitizer + 'Dat2Root' + ' --config_file=' + ConfigFilePath + ' --input_file=' + RawLocalPath + ' --output_file=' + RecoLocalPath
             if SaveWaveformBool: DatToRootCMD = DatToRootCMD + ' --save_meas'
-            DatToRootCMDWithoutTracksList.append(DatToRootCMD)
+            
+            if DoTracking: 
+                TrackFilePathLocal = am.BaseTrackDirLocal + 'Run%i_CMSTiming_converted.root' % run
+                DatToRootCMD = DatToRootCMD + ' --pixel_input_file=' + TrackFilePathLocal   
 
-            TrackFilePathLocal = am.BaseTrackDirLocal + 'Run%i_CMSTiming_converted.root' % run
-            DatToRootCMDWithTracksList.append(DatToRootCMD + ' --pixel_input_file=' + TrackFilePathLocal)                                        
-        
-        return DatToRootCMDWithTracksList, DatToRootCMDWithoutTracksList, ResultFileLocationList, RunList, FieldIDList
+            DatToRootCMDList.append(DatToRootCMD)
+
+        return DatToRootCMDList, ResultFileLocationList, RunList, FieldIDList
 
 
 
